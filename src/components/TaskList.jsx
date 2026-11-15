@@ -1,10 +1,8 @@
-
-import { useRef, useState } from "react";
+import { useState, useRef } from "react";
 import { useTasks } from "../context/TaskContext";
 
 function TaskList() {
   const { tasks, toggleComplete } = useTasks();
-
   const searchRef = useRef(null);
   const [search, setSearch] = useState("");
 
@@ -26,16 +24,16 @@ function TaskList() {
         <div key={task.id}>
           <span
             style={{
-              textDecoration: task.completed
-                ? "line-through"
-                : "none",
+              textDecoration: task.completed ? "line-through" : "none",
             }}
           >
             {task.title}
           </span>
 
-          <button data-testid={task.id} onClick={() => toggleComplete(task.id)}>
-
+          <button
+            data-testid={task.id}
+            onClick={() => toggleComplete(task.id)}
+          >
             {task.completed ? "Undo" : "Complete"}
           </button>
         </div>

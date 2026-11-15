@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect } from "react";
 
 const TaskContext = createContext();
@@ -6,19 +5,18 @@ const TaskContext = createContext();
 export function TaskProvider({ children }) {
   const [tasks, setTasks] = useState([]);
 
-  // GET: Fetch tasks from the backend
+  // Fetch tasks from the backend
   useEffect(() => {
     fetch("http://localhost:4000/tasks")
       .then((response) => response.json())
-      .then((data) => {
-        setTasks(data);
-      });
+      .then((data) => setTasks(data))
+      .catch((error) => console.error("Error fetching tasks:", error));
   }, []);
 
-  // POST: Add a new task
-  function addTask(formData) {
+  // Add a new task
+  function addTask(title) {
     const newTask = {
-      title: formData.title,
+      title,
       completed: false,
     };
 
@@ -31,11 +29,11 @@ export function TaskProvider({ children }) {
     })
       .then((response) => response.json())
       .then((savedTask) => {
-        setTasks((prev) => [...prev, savedTask]);
+        setTasks((previousTasks) => [...previousTasks, savedTask]);
       });
   }
 
-  // PATCH: Toggle task completion
+  // Toggle task completion
   function toggleComplete(id) {
     const task = tasks.find((task) => task.id === id);
 
@@ -51,15 +49,13 @@ export function TaskProvider({ children }) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        completed: updatedTask.completed,
-      }),
+      body: JSON.stringify({ completed: updatedTask.completed }),
     })
       .then((response) => response.json())
-      .then((data) => {
-        setTasks((prev) =>
-          prev.map((task) =>
-            task.id === id ? data : task
+      .then((savedTask) => {
+        setTasks((previousTasks) =>
+          previousTasks.map((task) =>
+            task.id === id ? savedTask : task
           )
         );
       });
@@ -67,19 +63,13 @@ export function TaskProvider({ children }) {
 
   return (
     <TaskContext.Provider
-      value={{
-        tasks,
-        setTasks,
-        addTask,
-        toggleComplete,
-      }}
+      value={{ tasks, setTasks, addTask, toggleComplete }}
     >
       {children}
     </TaskContext.Provider>
   );
 }
 
-// Custom hook
 export function useTasks() {
   return useContext(TaskContext);
 }
