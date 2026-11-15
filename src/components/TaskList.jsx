@@ -1,9 +1,10 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { useTasks } from "../context/TaskContext";
 
 function TaskList() {
   const { tasks, toggleComplete } = useTasks();
-  const searchRef = useRef(null);
+
+  const searchInput = useRef(null);
   const [search, setSearch] = useState("");
 
   const filteredTasks = tasks.filter((task) =>
@@ -13,7 +14,7 @@ function TaskList() {
   return (
     <div>
       <input
-        ref={searchRef}
+        ref={searchInput}
         type="text"
         placeholder="Search tasks..."
         value={search}
@@ -22,13 +23,7 @@ function TaskList() {
 
       {filteredTasks.map((task) => (
         <div key={task.id}>
-          <span
-            style={{
-              textDecoration: task.completed ? "line-through" : "none",
-            }}
-          >
-            {task.title}
-          </span>
+          <span>{task.title}</span>
 
           <button
             data-testid={task.id}
