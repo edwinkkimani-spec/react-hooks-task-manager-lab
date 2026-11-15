@@ -1,26 +1,31 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
 
 const TaskContext = createContext();
 
 export function TaskProvider({ children }) {
   const [tasks, setTasks] = useState([]);
 
-  // Fetch tasks from the backend
+  // Fetch tasks when the provider mounts
   useEffect(() => {
     fetch("http://localhost:4000/tasks")
       .then((response) => response.json())
       .then((data) => setTasks(data))
-      .catch((error) => console.error("Error fetching tasks:", error));
+      .catch((error) => console.error(error));
   }, []);
 
-  // Add a new task
+  // Add task
   function addTask(title) {
     const newTask = {
       title,
       completed: false,
     };
 
-    fetch("http://localhost:4000/tasks", {
+    return fetch("http://localhost:4000/tasks", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -29,7 +34,7 @@ export function TaskProvider({ children }) {
     })
       .then((response) => response.json())
       .then((savedTask) => {
-        setTasks((previousTasks) => [...previousTasks, savedTask]);
+        setTasks((prevTasks) => [...prevTasks, savedTask]);
       });
   }
 
@@ -39,23 +44,20 @@ export function TaskProvider({ children }) {
 
     if (!task) return;
 
-    const updatedTask = {
-      ...task,
-      completed: !task.completed,
-    };
-
-    fetch(`http://localhost:4000/tasks/${id}`, {
+    return fetch(`http://localhost:4000/tasks/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ completed: updatedTask.completed }),
+      body: JSON.stringify({
+        completed: !task.completed,
+      }),
     })
       .then((response) => response.json())
-      .then((savedTask) => {
-        setTasks((previousTasks) =>
-          previousTasks.map((task) =>
-            task.id === id ? savedTask : task
+      .then((updatedTask) => {
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === id ? updatedTask : task
           )
         );
       });
@@ -70,6 +72,7 @@ export function TaskProvider({ children }) {
   );
 }
 
+// Custom hook
 export function useTasks() {
   return useContext(TaskContext);
 }
